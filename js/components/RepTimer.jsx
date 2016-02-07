@@ -26,11 +26,11 @@ for (let k in PHRASES) {
 
 export default class RepTimer extends React.Component {
   state = {
-    prep: 5,
-    reps: 5,
-    down: 3,
+    prep: 2,
+    reps: 2,
+    down: 2,
     pause: 1,
-    up: 5,
+    up: 2,
     phase: null,
     currentTime: null,
     currentRep: null
@@ -48,7 +48,13 @@ export default class RepTimer extends React.Component {
         <div>
           {this.state.currentTime !== null ?
            <div className="jumbotron">
-           <h1>{this.state.phase.toUpperCase()} {this.state.currentTime}</h1>
+           <h1>
+           {this.state.phase.toUpperCase()}
+           {' '}
+           {this.state.currentTime}
+           {' '}
+           <small>{this.state.currentRep}</small>
+           </h1>
            </div>
           :
            <button
@@ -101,10 +107,12 @@ export default class RepTimer extends React.Component {
     if (this.state.currentTime === 1) {
       clearInterval(this._prepInterval);
       this.setState({
-        currentTime: null
+        currentTime: null,
+        currentRep: 0
       }, this._startTimer
       );
     } else {
+      this._say(this.state.currentTime - 1);
       this.setState({
         currentTime: this.state.currentTime - 1
       });
@@ -142,7 +150,11 @@ export default class RepTimer extends React.Component {
   _advancePhase(finishedPhase) {
     let index = PHASES.findIndex(phase => phase === finishedPhase);
     if (index === 2) {
-      this._stopTimer();
+      if (this.state.currentRep === this.state.reps) {
+        this._stopTimer();
+      } else {
+        this._startRep();
+      }
     } else {
       let nextPhase = PHASES[index + 1];
       this.setState({
@@ -152,6 +164,16 @@ export default class RepTimer extends React.Component {
         () => this._say(nextPhase)
       );
     }
+  }
+
+  _startRep() {
+    this.setState({
+      phase: null,
+      currentTime: null,
+      currentRep: this.state.currentRep + 1
+    },
+      this._advancePhase
+    );
   }
 
   _stopTimer() {
