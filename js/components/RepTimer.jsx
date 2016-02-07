@@ -26,23 +26,27 @@ for (let k in PHRASES) {
 
 export default class RepTimer extends React.Component {
   state = {
+    prep: 5,
+    reps: 5,
     down: 3,
     pause: 1,
     up: 5,
-    isPlaying: false,
     phase: null,
-    currentTime: null
+    currentTime: null,
+    currentRep: null
   };
 
   render() {
+    let params = ['prep', 'reps'];
+    params = params.concat(PHASES);
     return (
       <div className="row">
         <h1>Repr</h1>
         <div className="form-horizontal">
-          {PHASES.map(phase => this._renderTimeInput(phase))}
+          {params.map(param => this._renderInput(param))}
         </div>
         <div>
-          {this.state.isPlaying ?
+          {this.state.currentTime !== null ?
            <div className="jumbotron">
            <h1>{this.state.phase.toUpperCase()} {this.state.currentTime}</h1>
            </div>
@@ -56,40 +60,62 @@ export default class RepTimer extends React.Component {
     );
   }
 
-  _renderTimeInput(phase) {
+  _renderInput(param) {
     return (
       <div className="form-group">
         <label className="control-label col-md-2">
-          {phase.toUpperCase()}{' '}
+          {param.toUpperCase()}{' '}
         </label>
         <div className="col-md-10">
           <input
                   className="form-control"
                   type="number"
-                  value={this.state[phase]}
-                  onChange={this._setTime.bind(this, phase)}
+                  value={this.state[param]}
+                  onChange={this._setValue.bind(this, param)}
           />
         </div>
       </div>
     );
   }
 
-  _setTime(phase, e) {
+  _setValue(param, e) {
     let time = e.target.value;
-    this.setState({[phase]: time});
+    this.setState({[param]: time});
   }
 
   _getReady = () => {
     let utterance = this._say('get ready');
-    utterance.onend = this._startTimer;
+    utterance.onend = this._startPrepare;
+  };
+
+  _startPrepare = () => {
+    this.setState({
+      phase: 'prep',
+      currentTime: this.state.prep
+    },
+      () => this._prepInterval = setInterval(this._prepare, 1000)
+    );
+  };
+
+  _prepare = () => {
+    if (this.state.currentTime === 1) {
+      clearInterval(this._prepInterval);
+      this.setState({
+        currentTime: null
+      }, this._startTimer
+      );
+    } else {
+      this.setState({
+        currentTime: this.state.currentTime - 1
+      });
+    }
   };
 
   _startTimer = () => {
-    if (this.state.isPlaying) {
+    if (this.state.currentTime !== null) {
       return;
     }
     this.setState({
-      isPlaying: true,
       phase: 'down',
       currentTime: this.state['down']
     },
@@ -132,7 +158,6 @@ export default class RepTimer extends React.Component {
     this._say('stop');
     clearInterval(this._tick);
     this.setState({
-      isPlaying: false,
       phase: null,
       currentTime: null
     });
