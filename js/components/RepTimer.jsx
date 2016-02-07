@@ -16,9 +16,10 @@ for (let i = 0; i < 10; i += 1) {
 
 for (let k in PHRASES) {
   let phrase = PHRASES[k];
-  phrase.lang = 'en-EN';
+  phrase.lang = 'en-GB';
+  phrase.voice = 'Google UK English Female';
   // 'prime' the speaker
-  /* phrase.voice = 'Google UK English Female';
+  /* 
      phrase.volume = 0;
      speechSynthesis.speak(phrase);
      phrase.volume = 1; */
