@@ -189,10 +189,10 @@ export default class RepTimer extends React.Component {
   _stopTimer() {
     this._say('stop');
     clearInterval(this._tick);
-    this.setState({
-      phase: null,
-      currentTime: null
-    });
+    /* this.setState({
+       phase: null,
+       currentTime: null
+       }); */
   }
 
   _say(what) {
