@@ -133,7 +133,6 @@ export default class RepTimer extends React.Component {
   }
 
   _say(what) {
-    return;
     let utterThis = PHRASES[what];
     synth.speak(utterThis);
   }
