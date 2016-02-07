@@ -8,6 +8,7 @@ const PHRASES = {
   'up': new SpeechSynthesisUtterance('up'),
   'down': new SpeechSynthesisUtterance('down'),
   'pause': new SpeechSynthesisUtterance('pause'),
+  'get ready': new SpeechSynthesisUtterance('get ready'),
 };
 for (let i = 0; i < 10; i += 1) {
   PHRASES[i] = new SpeechSynthesisUtterance(i);
@@ -48,7 +49,7 @@ export default class RepTimer extends React.Component {
           :
            <button
            className="btn btn-success"
-           onClick={this._startTimer}>Start!</button>
+           onClick={this._getReady}>Start!</button>
           }
         </div>
       </div>
@@ -77,6 +78,11 @@ export default class RepTimer extends React.Component {
     let time = e.target.value;
     this.setState({[phase]: time});
   }
+
+  _getReady = () => {
+    let utterance = this._say('get ready');
+    utterance.onend = this._startTimer;
+  };
 
   _startTimer = () => {
     if (this.state.isPlaying) {
@@ -133,8 +139,8 @@ export default class RepTimer extends React.Component {
   }
 
   _say(what) {
-    return;
     let utterThis = PHRASES[what];
     synth.speak(utterThis);
+    return utterThis;
   }
 }
