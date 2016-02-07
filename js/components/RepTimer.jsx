@@ -1,5 +1,7 @@
 import React, { PropTypes } from 'react';
 
+import countdown from './countdown';
+
 const PHASES = ['down', 'pause', 'up'];
 const synth = window.speechSynthesis;
 const PHRASES = {
@@ -28,20 +30,22 @@ for (let k in PHRASES) {
 
 export default class RepTimer extends React.Component {
   state = {
-    prep: 2,
+    prep: 5,
     reps: 2,
-    down: 2,
+    down: 3,
     pause: 1,
-    up: 2,
-    phase: null,
-    currentTime: null,
-    currentRep: null
+    up: 3,
+    countdown: null
   };
 
   render() {
     this._sayState();
     let params = ['prep', 'reps'];
     params = params.concat(PHASES);
+    let prepCount = this._getPrepCount();
+    let phase = this._getPhase();
+    let phaseCount = this._getPhaseCount();
+    let repCount = this._getRepCount();
     return (
       <div className="row">
         <h1>Repr</h1>
@@ -49,14 +53,14 @@ export default class RepTimer extends React.Component {
           {params.map(param => this._renderInput(param))}
         </div>
         <div>
-          {this.state.currentTime !== null ?
+          {this.state.countdown !== null ?
            <div className="jumbotron">
            <h1>
-           {this.state.phase.toUpperCase()}
+           {phase.toUpperCase()}
            {' '}
-           {this.state.currentTime}
+           {phaseCount}
            {' '}
-           <small>{this.state.currentRep}</small>
+           <small>{repCount}</small>
            </h1>
            </div>
           :
@@ -69,13 +73,12 @@ export default class RepTimer extends React.Component {
     );
   }
 
-  _sayState() {
-    let { phase, currentTime } = this.state;
+  _sayState(phase, countdown) {
     if (phase) {
-      if (this.state[phase] === currentTime) {
+      if (this.state[phase] === countdown) {
         this._say(phase);
-      } else if (currentTime) {
-        this._say(currentTime);
+      } else if (countdown) {
+        this._say(countdown);
       }
     }
   }
@@ -105,95 +108,82 @@ export default class RepTimer extends React.Component {
 
   _getReady = () => {
     let utterance = this._say('get ready');
-    utterance.onend = this._startPrepare;
+    utterance.onend = this._countSet;
   };
 
-  _startPrepare = () => {
-    this.setState({
-      phase: 'prep',
-      currentTime: this.state.prep
-    },
-      () => this._prepInterval = setInterval(this._prepare, 1000)
+  _countSet = () => {
+    let { reps, prep, down, pause, up } = this.state;
+    let totalTime = prep + reps * (down + pause + up);
+    countdown(
+      totalTime,
+      (counter) => this.setState({
+        countdown: counter
+      })
     );
   };
 
-  _prepare = () => {
-    if (this.state.currentTime === 1) {
-      clearInterval(this._prepInterval);
-      this.setState({
-        currentTime: null,
-        currentRep: 0
-      }, this._startTimer
-      );
-    } else {
-      this.setState({
-        currentTime: this.state.currentTime - 1
-      });
-    }
-  };
-
-  _startTimer = () => {
-    if (this.state.currentTime !== null) {
-      return;
-    }
-    this.setState({
-      phase: 'down',
-      currentTime: this.state['down']
-    },
-      () => {
-        this._tick = setInterval(this._advanceTimer, 1000);
-      }
-    );
-  };
-
-  _advanceTimer = () => {
-    //    console.log('time', this.state.currentTime);
-    let currentTime = this.state.currentTime;
-    if (currentTime === 1) {
-      this._advancePhase(this.state.phase);
-    } else {
-      currentTime -= 1;
-      this.setState({
-        currentTime: currentTime
-      });
-    }
-  };
-
-  _advancePhase(finishedPhase) {
-    let index = PHASES.findIndex(phase => phase === finishedPhase);
-    if (index === 2) {
-      if (this.state.currentRep === this.state.reps) {
-        this._stopTimer();
-      } else {
-        this._startRep();
-      }
-    } else {
-      let nextPhase = PHASES[index + 1];
-      this.setState({
-        phase: nextPhase,
-        currentTime: this.state[nextPhase]
-      });
+  _getPrepCount() {
+    let { countdown, reps, prep, down, pause, up } = this.state;
+    let totalTime = prep + reps * (down + pause + up);
+    let currentTime = totalTime - countdown;
+    if (currentTime < prep) {
+      return currentTime;
     }
   }
 
-  _startRep() {
-    this.setState({
-      phase: null,
-      currentTime: null,
-      currentRep: this.state.currentRep + 1
-    },
-      this._advancePhase
-    );
+  _getPhaseCount() {
+    let { countdown, reps, prep, down, pause, up } = this.state;
+    let totalTime = prep + reps * (down + pause + up);
+    let currentTime = totalTime - countdown;
+    if (currentTime < prep) {
+      return prep - currentTime;
+    }
+    currentTime -= prep;
+    let repTime = down + pause + up;
+    let phaseTime = currentTime % repTime;
+    // TODO this is rep time not phase time
+    // TODO generalise this to N phases?
+    if (phaseTime >= down + pause) {
+      return this.state.up - (phaseTime - down - pause);
+    } else if (phaseTime >= down) {
+      return this.state.pause - (phaseTime - down);
+    } else {
+      return this.state.down - phaseTime;
+    }
   }
 
-  _stopTimer() {
+  _getRepCount() {
+    let { countdown, reps, prep, down, pause, up } = this.state;
+    let totalTime = prep + reps * (down + pause + up);
+    let currentTime = totalTime - countdown - prep;
+    let repTime = down + pause + up;
+    console.log(currentTime, repTime, currentTime / repTime);
+    return Math.floor(currentTime / repTime);
+  }
+
+  _getPhase() {
+    let { countdown, reps, prep, down, pause, up } = this.state;
+    let totalTime = prep + reps * (down + pause + up);
+    let currentTime = totalTime - countdown;
+    if (currentTime < prep) {
+      return 'prep';
+    }
+    currentTime -= prep;
+    let repDuration = down + pause + up;
+    let repTime = currentTime % repDuration;
+    // TODO generalise this to N phases?
+    if (repTime >= down + pause) {
+      return 'up';
+    } else if (repTime >= down) {
+      return 'pause';
+    } else {
+      return 'down';
+    }
+  }
+
+  _stopTimer = () => {
     this._say('stop');
-    clearInterval(this._tick);
-    /* this.setState({
-       phase: null,
-       currentTime: null
-       }); */
-  }
+  };
 
   _say(what) {
     console.log('saying', what);
