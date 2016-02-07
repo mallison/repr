@@ -69,7 +69,7 @@ export default class RepTimer extends React.Component {
 
   _renderInput(param) {
     return (
-      <div className="form-group">
+      <div className="form-group" key={param}>
         <label className="control-label col-md-2">
           {param.toUpperCase()}{' '}
         </label>
