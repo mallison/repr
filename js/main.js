@@ -1,4 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-ReactDOM.render(<p>ta da!</p>, document.getElementById('react-app'));
+import RepTimer from './components/RepTimer';
+
+ReactDOM.render(<RepTimer />, document.getElementById('react-app'));
+
+// for dev tools
+window.React = React;
