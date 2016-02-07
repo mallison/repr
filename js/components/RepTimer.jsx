@@ -3,6 +3,7 @@ import React, { PropTypes } from 'react';
 const PHASES = ['down', 'pause', 'up'];
 const synth = window.speechSynthesis;
 const PHRASES = {
+  'prep': new SpeechSynthesisUtterance('prepare'),
   'start': new SpeechSynthesisUtterance('start'),
   'stop': new SpeechSynthesisUtterance('stop'),
   'up': new SpeechSynthesisUtterance('up'),
@@ -38,6 +39,7 @@ export default class RepTimer extends React.Component {
   };
 
   render() {
+    this._sayState();
     let params = ['prep', 'reps'];
     params = params.concat(PHASES);
     return (
@@ -65,6 +67,17 @@ export default class RepTimer extends React.Component {
         </div>
       </div>
     );
+  }
+
+  _sayState() {
+    let { phase, currentTime } = this.state;
+    if (phase) {
+      if (this.state[phase] === currentTime) {
+        this._say(phase);
+      } else if (currentTime) {
+        this._say(currentTime);
+      }
+    }
   }
 
   _renderInput(param) {
@@ -113,7 +126,6 @@ export default class RepTimer extends React.Component {
       }, this._startTimer
       );
     } else {
-      this._say(this.state.currentTime - 1);
       this.setState({
         currentTime: this.state.currentTime - 1
       });
@@ -129,7 +141,6 @@ export default class RepTimer extends React.Component {
       currentTime: this.state['down']
     },
       () => {
-        this._say('start');
         this._tick = setInterval(this._advanceTimer, 1000);
       }
     );
@@ -143,8 +154,8 @@ export default class RepTimer extends React.Component {
     } else {
       currentTime -= 1;
       this.setState({
-        currentTime: currentTime}
-        , () => this._say(currentTime));
+        currentTime: currentTime
+      });
     }
   };
 
@@ -161,9 +172,7 @@ export default class RepTimer extends React.Component {
       this.setState({
         phase: nextPhase,
         currentTime: this.state[nextPhase]
-      },
-        () => this._say(nextPhase)
-      );
+      });
     }
   }
 
@@ -187,6 +196,7 @@ export default class RepTimer extends React.Component {
   }
 
   _say(what) {
+    console.log('saying', what);
     let utterThis = PHRASES[what];
     synth.speak(utterThis);
     return utterThis;
