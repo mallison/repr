@@ -1,4 +1,4 @@
-let intervalID = null;
+let intervalID = null; // TODO this means only one timer can run at a time!
 let counter;
 
 export default function countdown(numberOfSeconds, tick) {
@@ -9,10 +9,8 @@ export default function countdown(numberOfSeconds, tick) {
 
 function doCountdown(tick) {
   counter -= 1;
-  console.log('countdown', counter);
+  tick(counter);
   if (counter === 0) {
     clearInterval(intervalID);
-  } else {
-    tick(counter);
   }
 }
