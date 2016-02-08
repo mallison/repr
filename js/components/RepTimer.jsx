@@ -1,146 +1,82 @@
 import React, { PropTypes } from 'react';
 
-const PHASES = ['down', 'pause', 'up'];
-const synth = window.speechSynthesis;
-const PHRASES = {
-  'start': new SpeechSynthesisUtterance('start'),
-  'stop': new SpeechSynthesisUtterance('stop'),
-  'up': new SpeechSynthesisUtterance('up'),
-  'down': new SpeechSynthesisUtterance('down'),
-  'pause': new SpeechSynthesisUtterance('pause'),
-  'get ready': new SpeechSynthesisUtterance('get ready'),
-};
-for (let i = 0; i < 10; i += 1) {
-  PHRASES[i] = new SpeechSynthesisUtterance(i);
-}
+import TimerDisplay from './Timer';
+import countdown from './countdown';
+import say from './speech';
 
-for (let k in PHRASES) {
-  let phrase = PHRASES[k];
-  phrase.lang = 'en-EN';
-  // 'prime' the speaker
-  /* phrase.voice = 'Google UK English Female';
-     phrase.volume = 0;
-     speechSynthesis.speak(phrase);
-     phrase.volume = 1; */
-}
+const PHASES = ['down', 'pause', 'up'];
 
 export default class RepTimer extends React.Component {
   state = {
+    prep: 5,
+    reps: 2,
     down: 3,
     pause: 1,
-    up: 5,
-    isPlaying: false,
-    phase: null,
-    currentTime: null
+    up: 3,
+    countdown: null
   };
 
   render() {
+    let params = ['prep', 'reps'];
+    params = params.concat(PHASES);
+
+    /// debug
+    /* let timers = [];
+       let { reps, prep, down, pause, up } = this.state;
+       for (let i = prep + reps * (down + pause + up); i >= 0; i -= 1) {
+       timers.push(<TimerDisplay {...this.state} countdown={i} />);
+       } */
+
     return (
       <div className="row">
         <h1>Repr</h1>
-        <div className="form-horizontal">
-          {PHASES.map(phase => this._renderTimeInput(phase))}
+        <div className="form-inline">
+          {params.map(param => this._renderInput(param))}
         </div>
-        <div>
-          {this.state.isPlaying ?
-           <div className="jumbotron">
-           <h1>{this.state.phase.toUpperCase()} {this.state.currentTime}</h1>
-           </div>
-          :
-           <button
-           className="btn btn-success"
-           onClick={this._getReady}>Start!</button>
-          }
-        </div>
+        <TimerDisplay {...this.state} />
+        <button
+                className="btn btn-success"
+                onClick={this._getReady}>Start!
+        </button>
       </div>
     );
   }
 
-  _renderTimeInput(phase) {
+  _renderInput(param) {
     return (
-      <div className="form-group">
-        <label className="control-label col-md-2">
-          {phase.toUpperCase()}{' '}
+      <div className="form-group" key={param} style={{paddingRight: 5}}>
+        <label>
+          {param.toUpperCase()}
         </label>
-        <div className="col-md-10">
-          <input
-                  className="form-control"
-                  type="number"
-                  value={this.state[phase]}
-                  onChange={this._setTime.bind(this, phase)}
-          />
-        </div>
+        {' '}
+        <input
+                className="form-control"
+                type="number"
+                value={this.state[param]}
+                onChange={this._setValue.bind(this, param)}
+        />
       </div>
     );
   }
 
-  _setTime(phase, e) {
+  _setValue(param, e) {
     let time = e.target.value;
-    this.setState({[phase]: time});
+    this.setState({[param]: time});
   }
 
   _getReady = () => {
-    let utterance = this._say('get ready');
-    utterance.onend = this._startTimer;
+    let utterance = say('get ready');
+    utterance.onend = this._countSet;
   };
 
-  _startTimer = () => {
-    if (this.state.isPlaying) {
-      return;
-    }
-    this.setState({
-      isPlaying: true,
-      phase: 'down',
-      currentTime: this.state['down']
-    },
-      () => {
-        this._say('start');
-        this._tick = setInterval(this._advanceTimer, 1000);
-      }
+  _countSet = () => {
+    let { reps, prep, down, pause, up } = this.state;
+    let totalTime = prep + reps * (down + pause + up);
+    countdown(
+      totalTime,
+      (counter) => this.setState({
+        countdown: counter
+      })
     );
   };
-
-  _advanceTimer = () => {
-    //    console.log('time', this.state.currentTime);
-    let currentTime = this.state.currentTime;
-    if (currentTime === 1) {
-      this._advancePhase(this.state.phase);
-    } else {
-      currentTime -= 1;
-      this.setState({
-        currentTime: currentTime}
-        , () => this._say(currentTime));
-    }
-  };
-
-  _advancePhase(finishedPhase) {
-    let index = PHASES.findIndex(phase => phase === finishedPhase);
-    if (index === 2) {
-      this._stopTimer();
-    } else {
-      let nextPhase = PHASES[index + 1];
-      this.setState({
-        phase: nextPhase,
-        currentTime: this.state[nextPhase]
-      },
-        () => this._say(nextPhase)
-      );
-    }
-  }
-
-  _stopTimer() {
-    this._say('stop');
-    clearInterval(this._tick);
-    this.setState({
-      isPlaying: false,
-      phase: null,
-      currentTime: null
-    });
-  }
-
-  _say(what) {
-    let utterThis = PHRASES[what];
-    synth.speak(utterThis);
-    return utterThis;
-  }
 }
