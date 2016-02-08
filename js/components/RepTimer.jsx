@@ -33,15 +33,11 @@ export default class RepTimer extends React.Component {
         <div className="form-inline">
           {params.map(param => this._renderInput(param))}
         </div>
-        <div>
-          {this.state.countdown !== null ?
-           <TimerDisplay {...this.state} />
-           :
-           <button
-           className="btn btn-success"
-           onClick={this._getReady}>Start!</button>
-           }
-        </div>
+        <TimerDisplay {...this.state} />
+        <button
+                className="btn btn-success"
+                onClick={this._getReady}>Start!
+        </button>
       </div>
     );
   }
