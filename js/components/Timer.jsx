@@ -30,6 +30,7 @@ export default class Timer extends React.Component {
     }
   }
 
+  // TODO factor out duplication in these methods
   _getPhaseCount() {
     let { countdown, reps, prep, down, pause, up } = this.props;
     let totalTime = prep + reps * (down + pause + up);
