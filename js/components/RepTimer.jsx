@@ -30,7 +30,7 @@ export default class RepTimer extends React.Component {
     return (
       <div className="row">
         <h1>Repr</h1>
-        <div className="form-horizontal">
+        <div className="form-inline">
           {params.map(param => this._renderInput(param))}
         </div>
         <div>
@@ -40,7 +40,7 @@ export default class RepTimer extends React.Component {
            <button
            className="btn btn-success"
            onClick={this._getReady}>Start!</button>
-          }
+           }
         </div>
       </div>
     );
@@ -48,18 +48,17 @@ export default class RepTimer extends React.Component {
 
   _renderInput(param) {
     return (
-      <div className="form-group" key={param}>
-        <label className="control-label col-md-2">
-          {param.toUpperCase()}{' '}
+      <div className="form-group" key={param} style={{paddingRight: 5}}>
+        <label>
+          {param.toUpperCase()}
         </label>
-        <div className="col-md-10">
-          <input
-                  className="form-control"
-                  type="number"
-                  value={this.state[param]}
-                  onChange={this._setValue.bind(this, param)}
-          />
-        </div>
+        {' '}
+        <input
+                className="form-control"
+                type="number"
+                value={this.state[param]}
+                onChange={this._setValue.bind(this, param)}
+        />
       </div>
     );
   }
