@@ -60,7 +60,7 @@ export default class RepTimer extends React.Component {
   }
 
   _setValue(param, e) {
-    let time = e.target.value;
+    let time = parseInt(e.target.value, 10);
     this.setState({[param]: time});
   }
 
