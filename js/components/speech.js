@@ -10,8 +10,10 @@ const PHRASES = {
   'get ready': new SpeechSynthesisUtterance('get ready')
 };
 
-for (let i = 0; i < 10; i += 1) {
+for (let i = 0; i < 21; i += 1) {
   PHRASES[i] = new SpeechSynthesisUtterance(i);
+  let completedRep = `at ${i}`;
+  PHRASES[completedRep] = new SpeechSynthesisUtterance(completedRep);
 }
 
 for (let k in PHRASES) {

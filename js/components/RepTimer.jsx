@@ -12,13 +12,18 @@ export default class RepTimer extends React.Component {
     reps: 2,
     down: 3,
     pause: 1,
+    isReversed: false,
     up: 3,
     countdown: null
   };
 
   render() {
     let params = ['prep', 'reps'];
-    params = params.concat(PHASES);
+    let phases = [...PHASES];
+    if (this.state.isReversed) {
+      phases.reverse();
+    }
+    params = params.concat(phases);
 
     /// debug
     /* let timers = [];
@@ -33,6 +38,12 @@ export default class RepTimer extends React.Component {
         <div className="form-inline">
           {params.map(param => this._renderInput(param))}
         </div>
+        <button
+                onClick={() => this.setState({isReversed: !this.state.isReversed})}
+                className="btn btn-primary"
+                >
+          Reverse phases
+        </button>
         {this.state.countdown !== null ? <TimerDisplay {...this.state} /> : null}
         <button
                 className="btn btn-success"

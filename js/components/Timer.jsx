@@ -6,24 +6,28 @@ export default class Timer extends React.Component {
   render() {
     let phase = this._getPhase();
     let phaseCount = this._getPhaseCount();
-    let repCount = this._getRepCount();
-    this._say(phase, phaseCount);
+    let { completedReps, isCompleted } = this._getRepCount();
+    if (this.props.countdown === 0) {
+      say('stop');
+    } else if (completedReps && isCompleted) {
+      say(`at ${completedReps}`);
+    } else {
+      this._say(phase, phaseCount);
+    }
     return (
       <div className="jumbotron">
         <h1>
-          {repCount < this.props.reps ?
+          {completedReps < this.props.reps ?
            `${phase.toUpperCase()} ${phaseCount} ` : null }
-          {repCount > 0 ?
-           <small>Completed reps: {repCount}</small> : null }
+          {completedReps > 0 ?
+           <small>Completed reps: {completedReps}</small> : null }
         </h1>
       </div>
     );
   }
 
   _say(phase, phaseCount) {
-    if (this.props.countdown === 0) {
-      say('stop');
-    } else if (this.props[phase] === phaseCount) {
+    if (this.props[phase] === phaseCount) {
       say(phase);
     } else {
       say(phaseCount);
@@ -33,22 +37,23 @@ export default class Timer extends React.Component {
   // TODO factor out duplication in these methods
   _getPhaseCount() {
     let { countdown, reps, prep, down, pause, up } = this.props;
-    let totalTime = prep + reps * (down + pause + up);
+    let phases = this._getPhases();
+    let repTime = down + pause + up;
+    let totalTime = prep + reps * repTime;
     let currentTime = totalTime - countdown;
     if (currentTime < prep) {
       return prep - currentTime;
     }
     currentTime -= prep;
-    let repTime = down + pause + up;
     let phaseTime = currentTime % repTime;
     // TODO this is rep time not phase time
     // TODO generalise this to N phases?
-    if (phaseTime >= down + pause) {
-      return this.props.up - (phaseTime - down - pause);
-    } else if (phaseTime >= down) {
-      return this.props.pause - (phaseTime - down);
+    if (phaseTime >= phases[0].count + pause) {
+      return phases[1].count - (phaseTime - phases[0].count - pause);
+    } else if (phaseTime >= phases[0].count) {
+      return this.props.pause - (phaseTime - phases[0].count);
     } else {
-      return this.props.down - phaseTime;
+      return phases[0].count - phaseTime;
     }
   }
 
@@ -57,26 +62,41 @@ export default class Timer extends React.Component {
     let totalTime = prep + reps * (down + pause + up);
     let currentTime = totalTime - countdown - prep;
     let repTime = down + pause + up;
-    return Math.floor(currentTime / repTime);
+    let repCount = currentTime / repTime;
+    let completedReps = Math.floor(repCount);
+    let isCompleted = repCount === completedReps;
+    return {completedReps, isCompleted: isCompleted};
   }
 
   _getPhase() {
     let { countdown, reps, prep, down, pause, up } = this.props;
-    let totalTime = prep + reps * (down + pause + up);
+    let phases = this._getPhases();
+    let repDuration = down + pause + up;
+    let totalTime = prep + reps * repDuration;
     let currentTime = totalTime - countdown;
     if (currentTime < prep) {
       return 'prep';
     }
     currentTime -= prep;
-    let repDuration = down + pause + up;
     let repTime = currentTime % repDuration;
     // TODO generalise this to N phases?
-    if (repTime >= down + pause) {
-      return 'up';
-    } else if (repTime >= down) {
+    if (repTime >= phases[0].count + pause) {
+      return phases[1].name;
+    } else if (repTime >= phases[1].count) {
       return 'pause';
     } else {
-      return 'down';
+      return phases[0].name;
     }
+  }
+
+  _getPhases() {
+    let phases = [
+        {name: 'down', count: this.props.down},
+        {name: 'up', count: this.props.up}
+    ];
+    if (this.props.isReversed) {
+      phases.reverse();
+    }
+    return phases;
   }
 }
