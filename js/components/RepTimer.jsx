@@ -26,16 +26,15 @@ export default class RepTimer extends React.Component {
     params = params.concat(phases);
 
     /// debug
-    let timers = [];
-    let { reps, prep, down, pause, up } = this.state;
-    for (let i = prep + reps * (down + pause + up); i >= 0; i -= 1) {
-      timers.push(<TimerDisplay {...this.state} countdown={i} />);
-    }
+    /* let timers = [];
+       let { reps, prep, down, pause, up } = this.state;
+       for (let i = prep + reps * (down + pause + up); i >= 0; i -= 1) {
+       timers.push(<TimerDisplay {...this.state} countdown={i} />);
+       } */
 
     return (
       <div className="row">
         <h1>Repr</h1>
-        {timers}
         <div className="form-inline">
           {params.map(param => this._renderInput(param))}
         </div>
