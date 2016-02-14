@@ -82,7 +82,7 @@ export default class Timer extends React.Component {
     // TODO generalise this to N phases?
     if (repTime >= phases[0].count + pause) {
       return phases[1].name;
-    } else if (repTime >= phases[1].count) {
+    } else if (repTime >= phases[0].count) {
       return 'pause';
     } else {
       return phases[0].name;
