@@ -6,24 +6,28 @@ export default class Timer extends React.Component {
   render() {
     let phase = this._getPhase();
     let phaseCount = this._getPhaseCount();
-    let repCount = this._getRepCount();
-    this._say(phase, phaseCount);
+    let { completedReps, isCompleted } = this._getRepCount();
+    if (this.props.countdown === 0) {
+      say('stop');
+    } else if (completedReps && isCompleted) {
+      say(`at ${completedReps}`);
+    } else {
+      this._say(phase, phaseCount);
+    }
     return (
       <div className="jumbotron">
         <h1>
-          {repCount < this.props.reps ?
+          {completedReps < this.props.reps ?
            `${phase.toUpperCase()} ${phaseCount} ` : null }
-          {repCount > 0 ?
-           <small>Completed reps: {repCount}</small> : null }
+          {completedReps > 0 ?
+           <small>Completed reps: {completedReps}</small> : null }
         </h1>
       </div>
     );
   }
 
   _say(phase, phaseCount) {
-    if (this.props.countdown === 0) {
-      say('stop');
-    } else if (this.props[phase] === phaseCount) {
+    if (this.props[phase] === phaseCount) {
       say(phase);
     } else {
       say(phaseCount);
@@ -58,7 +62,10 @@ export default class Timer extends React.Component {
     let totalTime = prep + reps * (down + pause + up);
     let currentTime = totalTime - countdown - prep;
     let repTime = down + pause + up;
-    return Math.floor(currentTime / repTime);
+    let repCount = currentTime / repTime;
+    let completedReps = Math.floor(repCount);
+    let isCompleted = repCount === completedReps;
+    return {completedReps, isCompleted: isCompleted};
   }
 
   _getPhase() {
