@@ -35,21 +35,26 @@ export default class RepTimer extends React.Component {
     return (
       <div className="row">
         <h1>Repr</h1>
-        {timers}
-        <div className="form-inline">
-          {params.map(param => this._renderInput(param))}
-        </div>
-        <button
+        {this.state.countdown === null ?
+        <div>
+         {params.map(param => this._renderInput(param))}
+          <button
+                type="button"
                 onClick={() => this.setState({isReversed: !this.state.isReversed})}
-                className="btn btn-primary"
+                className="btn btn-primary btn-block"
                 >
           Reverse phases
         </button>
-        {this.state.countdown !== null ? <TimerDisplay {...this.state} /> : null}
         <button
-                className="btn btn-success"
+                type="button"
+                className="btn btn-success btn-block"
                 onClick={this._getReady}>Start!
         </button>
+        </div>
+        : null }
+        <div>
+          {this.state.countdown !== null ? <TimerDisplay {...this.state} /> : null}
+        </div>
       </div>
     );
   }

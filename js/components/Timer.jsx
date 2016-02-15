@@ -15,7 +15,7 @@ export default class Timer extends React.Component {
       this._say(phase, phaseCount);
     }
     return (
-      <div className="jumbotron">
+      <div>
         <h1>
           {completedReps < this.props.reps ?
            `${phase.toUpperCase()} ${phaseCount} ` : null }
