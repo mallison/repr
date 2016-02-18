@@ -14,7 +14,7 @@ export default class RepTimer extends React.Component {
     pause: 1,
     isReversed: false,
     up: 2,
-    countdown: null
+    countdown: 0
   };
 
   render() {
@@ -35,7 +35,7 @@ export default class RepTimer extends React.Component {
     return (
       <div className="row">
         <h1>Repr</h1>
-        {this.state.countdown === null ?
+        {this.state.countdown === 0 ?
         <div>
          {params.map(param => this._renderInput(param))}
           <button
