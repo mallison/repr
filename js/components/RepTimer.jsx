@@ -8,12 +8,12 @@ const PHASES = ['down', 'pause', 'up'];
 
 export default class RepTimer extends React.Component {
   state = {
-    prep: 1,
-    reps: 1,
-    down: 1,
+    prep: 5,
+    reps: 8,
+    down: 3,
     pause: 1,
     isReversed: false,
-    up: 1,
+    up: 2,
     countdown: null,
     isSetCompleted: false,
   };
