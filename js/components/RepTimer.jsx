@@ -8,13 +8,14 @@ const PHASES = ['down', 'pause', 'up'];
 
 export default class RepTimer extends React.Component {
   state = {
-    prep: 5,
-    reps: 8,
-    down: 3,
+    prep: 1,
+    reps: 1,
+    down: 1,
     pause: 1,
     isReversed: false,
-    up: 2,
-    countdown: 0
+    up: 1,
+    countdown: null,
+    isSetCompleted: false,
   };
 
   render() {
@@ -35,7 +36,7 @@ export default class RepTimer extends React.Component {
     return (
       <div className="row">
         <h1>Repr</h1>
-        {this.state.countdown === 0 ?
+        {this.state.countdown === null ?
         <div>
          {params.map(param => this._renderInput(param))}
           <button
@@ -53,7 +54,7 @@ export default class RepTimer extends React.Component {
         </div>
         : null }
         <div>
-          {this.state.countdown !== null ? <TimerDisplay {...this.state} /> : null}
+          {this.state.isSetCompleted || this.state.countdown !== null ? <TimerDisplay {...this.state} /> : null}
         </div>
       </div>
     );
@@ -93,6 +94,10 @@ export default class RepTimer extends React.Component {
       totalTime,
       (counter) => this.setState({
         countdown: counter
+      }),
+      () => this.setState({
+        countdown: null,
+        isSetCompleted: true
       })
     );
   };

@@ -7,12 +7,14 @@ export default class Timer extends React.Component {
     let phase = this._getPhase();
     let phaseCount = this._getPhaseCount();
     let { completedReps, isCompleted } = this._getRepCount();
-    if (this.props.countdown === 0) {
-      say('stop');
-    } else if (completedReps && isCompleted) {
-      say(`at ${completedReps}`);
-    } else {
-      this._say(phase, phaseCount);
+    if (this.props.countdown !== null) {
+      if (this.props.countdown === 0) {
+        say('stop');
+      } else if (completedReps && isCompleted) {
+        say(`at ${completedReps}`);
+      } else {
+        this._say(phase, phaseCount);
+      }
     }
     return (
       <div>
